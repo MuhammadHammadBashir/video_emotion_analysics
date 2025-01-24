@@ -1,5 +1,7 @@
 import streamlit as st
 import os
+import json
+import requests
 from azure.storage.blob import BlobServiceClient
 
 def upload_file_to_folder(blob_service_client, container_name, folder_path, file_path):
@@ -16,40 +18,30 @@ def upload_file_to_folder(blob_service_client, container_name, folder_path, file
         str: URL of the uploaded blob or None if the upload failed.
     """
     try:
-        # Extract the file name from the local file path
         file_name = os.path.basename(file_path)
-
-        # Construct the blob path with the folder structure
         blob_path = f"{folder_path}/{file_name}".strip("/")
-
-        # Get the blob client
         blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_path)
 
-        # Upload the file
         with open(file_path, "rb") as data:
             blob_client.upload_blob(data, overwrite=True)
 
-        print(f"File uploaded to: {blob_client.url}")
         return blob_client.url
     except Exception as e:
-        print(f"Failed to upload file: {e}")
+        st.error(f"Failed to upload file: {e}")
         return None
 
+# Azure and Streamlit setup
 CONNECT_STR = st.secrets["api_keys"]["azure"]
 CONTAINER_NAME = 'emotionvideoanalysics'
 BLOB_SERVICE_CLIENT = BlobServiceClient.from_connection_string(CONNECT_STR)
 
-# Streamlit application
-st.title("Upload Videos to Azure Blob Storage")
+st.title("Emotion Analysis for Videos")
 
 # File uploader
 uploaded_file = st.file_uploader("Select a video file to upload", type=["mp4", "avi"])
 
-# Folder path input
-# folder_path = st.text_input("Enter the folder path in Azure Blob Storage (e.g., 'videos/subfolder')", value="videos")
 folder_path = 'videos'
 if uploaded_file:
-    # Save the uploaded file temporarily
     temp_file_path = os.path.join("temp", uploaded_file.name)
     os.makedirs("temp", exist_ok=True)
     with open(temp_file_path, "wb") as f:
@@ -57,19 +49,49 @@ if uploaded_file:
 
     st.write(f"Selected file: {uploaded_file.name}")
 
-    # Upload button
-    if st.button("Upload for analysics"):
+    if st.button("Upload and Analyze"):
         st.info("Uploading file...")
-
-        # Upload file to Azure Blob Storage
         blob_url = upload_file_to_folder(BLOB_SERVICE_CLIENT, CONTAINER_NAME, folder_path, temp_file_path)
 
         if blob_url:
             st.success(f"File successfully uploaded to {folder_path}! Blob URL: {blob_url}")
+
+            st.info("Processing the uploaded video for emotion analysis... This might take a few minutes.")
+            with st.spinner("Analyzing emotions... Please wait."):
+                url = "https://api.cortex.cerebrium.ai/v4/p-c3473400/emotionanalysics/run"
+                payload = json.dumps({'media_url': blob_url})
+                headers = {
+                    'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...',
+                    'Content-Type': 'application/json'
+                }
+
+                try:
+                    response = requests.post(url, headers=headers, data=payload, timeout=300)
+                    response_data = response.json()
+
+                    if "result" in response_data:
+                        result = response_data["result"]
+                        result_video_path = result.get("result_video_path", "N/A")
+                        combined_html_path = result.get("combined_html_path", "N/A")
+
+                        st.success("Analysis completed successfully!")
+                        st.markdown("### Key Results")
+                        st.markdown(f"- **Result Video Path:** [{result_video_path}]({result_video_path})" if result_video_path != "N/A" else "- **Result Video Path:** N/A")
+                        st.markdown(f"- **Combined HTML Path:** [{combined_html_path}]({combined_html_path})" if combined_html_path != "N/A" else "- **Combined HTML Path:** N/A")
+
+                        st.markdown("### Additional Results")
+                        for key, value in result.items():
+                            if key not in ["result_video_path", "combined_html_path"]:
+                                st.markdown(f"- **{key.replace('_', ' ').capitalize()}:** [{value}]({value})")
+                    else:
+                        st.error("Error: The API response did not contain expected results.")
+
+                except requests.exceptions.RequestException as e:
+                    st.error(f"API request failed: {e}")
+
         else:
             st.error("Failed to upload file.")
 
-        # Cleanup temporary file
         os.remove(temp_file_path)
 else:
     st.info("Please upload a video file (.mp4 or .avi).")
