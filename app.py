@@ -19,6 +19,7 @@ def upload_file_to_folder(blob_service_client, container_name, folder_path, file
     """
     try:
         file_name = os.path.basename(file_path)
+        file_name = file_name.replace(" ", "_")
         blob_path = f"{folder_path}/{file_name}".strip("/")
         blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_path)
 
