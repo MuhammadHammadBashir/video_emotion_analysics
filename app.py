@@ -96,18 +96,19 @@ if uploaded_file:
                         # Check if the result video path is available and display it in a video player
                         if result_video_path != "N/A":
                             st.markdown("#### Result Video")
+                            st.markdown(f"- **Result Video download:** [{result_video_path}]({result_video_path})" if result_video_path != "N/A" else "- **Result Video Path:** N/A")
                             st.video(result_video_path, format="video/mp4", start_time=0)
                         else:
                             st.markdown("- **Result Video Path:** N/A")
+                        st.markdown(""""### Additional zip Results  (contains files for each seconds, transcriptions etc)""")
                         for key, value in result.items():
                             if key not in ["result_video_path", "combined_html_path"]:
-                                st.markdown(f"- **{key.replace('_', ' ').capitalize()}:** [{value}]({value})")  
-
+                                st.markdown(f"- **{key.replace('_', ' ').capitalize()}:** [{value}]({value})")
                         # Check if the combined HTML path is available and display it in a scrollable window
                         if combined_html_path != "N/A":
-                            st.markdown("#### Combined HTML Output")
-                            st.markdown(f"Open in new tab: [Combined HTML Path]({combined_html_path})")
-                            with st.spinner("Loading HTML content..."):
+                            st.markdown("#### Combined visulaization Output")
+                            st.markdown(f"Download: [Combined visualization Path]({combined_html_path})")
+                            with st.spinner("Loading combined HTML content..."):
                                 try:
                                     response = requests.get(combined_html_path, timeout=30)  # Load HTML content
                                     response.raise_for_status()  # Raise an error for HTTP issues
@@ -120,8 +121,7 @@ if uploaded_file:
                         else:
                             st.markdown("- **Combined HTML Path:** N/A")
 
-                        st.markdown("### Additional Results")
-                  
+                    
                     else:
                         st.error("Error: The API response did not contain expected results.")
                 ## here is the result
