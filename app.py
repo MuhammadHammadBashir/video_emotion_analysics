@@ -69,6 +69,22 @@ if uploaded_file:
                     response = requests.post(url, headers=headers, data=payload, timeout=300)
                     response_data = response.json()
 
+                    # if "result" in response_data:
+                    #     result = response_data["result"]
+                    #     result_video_path = result.get("result_video_path", "N/A")
+                    #     combined_html_path = result.get("combined_html_path", "N/A")
+
+                    #     st.success("Analysis completed successfully!")
+                    #     st.markdown("### Key Results")
+                    #     st.markdown(f"- **Result Video Path:** [{result_video_path}]({result_video_path})" if result_video_path != "N/A" else "- **Result Video Path:** N/A")
+                    #     st.markdown(f"- **Combined HTML Path:** [{combined_html_path}]({combined_html_path})" if combined_html_path != "N/A" else "- **Combined HTML Path:** N/A")
+
+                    #     st.markdown("### Additional Results")
+                    #     for key, value in result.items():
+                    #         if key not in ["result_video_path", "combined_html_path"]:
+                    #             st.markdown(f"- **{key.replace('_', ' ').capitalize()}:** [{value}]({value})")
+                    # else:
+                    #     st.error("Error: The API response did not contain expected results.")
                     if "result" in response_data:
                         result = response_data["result"]
                         result_video_path = result.get("result_video_path", "N/A")
@@ -76,16 +92,39 @@ if uploaded_file:
 
                         st.success("Analysis completed successfully!")
                         st.markdown("### Key Results")
-                        st.markdown(f"- **Result Video Path:** [{result_video_path}]({result_video_path})" if result_video_path != "N/A" else "- **Result Video Path:** N/A")
-                        st.markdown(f"- **Combined HTML Path:** [{combined_html_path}]({combined_html_path})" if combined_html_path != "N/A" else "- **Combined HTML Path:** N/A")
+
+                        # Check if the result video path is available and display it in a video player
+                        if result_video_path != "N/A":
+                            st.markdown("#### Result Video")
+                            st.video(result_video_path, format="video/mp4", start_time=0)
+                        else:
+                            st.markdown("- **Result Video Path:** N/A")
+
+                        # Check if the combined HTML path is available and display it in a scrollable window
+                        if combined_html_path != "N/A":
+                            st.markdown("#### Combined HTML Output")
+                            st.markdown(f"Open in new tab: [Combined HTML Path]({combined_html_path})")
+                            with st.spinner("Loading HTML content..."):
+                                try:
+                                    response = requests.get(combined_html_path, timeout=30)  # Load HTML content
+                                    response.raise_for_status()  # Raise an error for HTTP issues
+                                    html_content = response.text
+
+                                    # Render the HTML in a scrollable container
+                                    st.components.v1.html(html_content, height=500, scrolling=True)
+                                except requests.exceptions.RequestException as e:
+                                    st.error(f"Failed to load HTML content: {e}")
+                        else:
+                            st.markdown("- **Combined HTML Path:** N/A")
 
                         st.markdown("### Additional Results")
                         for key, value in result.items():
                             if key not in ["result_video_path", "combined_html_path"]:
-                                st.markdown(f"- **{key.replace('_', ' ').capitalize()}:** [{value}]({value})")
+                                st.markdown(f"- **{key.replace('_', ' ').capitalize()}:** [{value}]({value})")                    
                     else:
                         st.error("Error: The API response did not contain expected results.")
-
+                ## here is the result
+                
                 except requests.exceptions.RequestException as e:
                     st.error(f"API request failed: {e}")
 
