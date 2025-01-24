@@ -99,6 +99,9 @@ if uploaded_file:
                             st.video(result_video_path, format="video/mp4", start_time=0)
                         else:
                             st.markdown("- **Result Video Path:** N/A")
+                        for key, value in result.items():
+                            if key not in ["result_video_path", "combined_html_path"]:
+                                st.markdown(f"- **{key.replace('_', ' ').capitalize()}:** [{value}]({value})")  
 
                         # Check if the combined HTML path is available and display it in a scrollable window
                         if combined_html_path != "N/A":
@@ -118,9 +121,7 @@ if uploaded_file:
                             st.markdown("- **Combined HTML Path:** N/A")
 
                         st.markdown("### Additional Results")
-                        for key, value in result.items():
-                            if key not in ["result_video_path", "combined_html_path"]:
-                                st.markdown(f"- **{key.replace('_', ' ').capitalize()}:** [{value}]({value})")                    
+                  
                     else:
                         st.error("Error: The API response did not contain expected results.")
                 ## here is the result
