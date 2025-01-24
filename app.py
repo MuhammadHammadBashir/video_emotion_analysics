@@ -97,14 +97,6 @@ if uploaded_file:
                         if result_video_path != "N/A":
                             st.markdown("#### Result Video")
                             st.markdown(f"- **Result Video download:** [{result_video_path}]({result_video_path})" if result_video_path != "N/A" else "- **Result Video Path:** N/A")
-                            # st.video(result_video_path, format="video/mp4", start_time=0)
-                            html_code = f"""
-                            <video width="100%" controls>
-                                <source src="{result_video_path}" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
-                            """
-                            st.components.v1.html(html_code, height=500)
                         else:
                             st.markdown("- **Result Video Path:** N/A")
                         st.markdown("""### Additional zip Results  (contains files for each seconds, transcriptions etc)""")
