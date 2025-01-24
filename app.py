@@ -97,7 +97,14 @@ if uploaded_file:
                         if result_video_path != "N/A":
                             st.markdown("#### Result Video")
                             st.markdown(f"- **Result Video download:** [{result_video_path}]({result_video_path})" if result_video_path != "N/A" else "- **Result Video Path:** N/A")
-                            st.video(result_video_path, format="video/mp4", start_time=0)
+                            # st.video(result_video_path, format="video/mp4", start_time=0)
+                            html_code = f"""
+                            <video width="100%" controls>
+                                <source src="{result_video_path}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            """
+                            st.components.v1.html(html_code, height=500)
                         else:
                             st.markdown("- **Result Video Path:** N/A")
                         st.markdown("""### Additional zip Results  (contains files for each seconds, transcriptions etc)""")
@@ -107,7 +114,7 @@ if uploaded_file:
                         # Check if the combined HTML path is available and display it in a scrollable window
                         if combined_html_path != "N/A":
                             st.markdown("#### Combined visulaization Output")
-                            st.markdown(f"Download: [Combined visualization Path]({combined_html_path})")
+                            st.markdown(f"Download: [Combined visualization ]({combined_html_path})")
                             with st.spinner("Loading combined HTML content..."):
                                 try:
                                     response = requests.get(combined_html_path, timeout=30)  # Load HTML content
