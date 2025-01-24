@@ -61,7 +61,7 @@ if uploaded_file:
                 url = "https://api.cortex.cerebrium.ai/v4/p-c3473400/emotionanalysics/run"
                 payload = json.dumps({'media_url': blob_url})
                 headers = {
-                'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0SWQiOiJwLWMzNDczNDAwIiwiaWF0IjoxNzI4NTc1MzE2LCJleHAiOjIwNDQxNTEzMTZ9.ZOCrcJQPR_qkLBLAl35sKEHLPkR1Y1-axgHx5ghjymF7nQa9fEh69BLGBeGOvB1tM_o_spFN1qLoyqrBQSzyvrHLze9lRX1By69eYDcXDAZehIOkFrOknhXkQdUCbXiX2Gu9NscFfeY85SF897DKt9NbauJD0jGjyWJ5XIW_5clw2JlJaRTUSFzKB3Rdl0wdb04EsyiLY85SyT6GQTCgXt5eISk_9kowv68lAiEfYYpKjfdXfMnsCTGONXG4gCQdat7RM9GqaQxgmDhkOiUwgUFChl8EQQy2dgydQEdaI8F8ZWn7buEB3m5Znywwz8hCkTh8eEZPwNNJI1vQk499bg',
+                'Authorization': st.secrets["api_keys"]["cerebrium"],
                 'Content-Type': 'application/json'
                 }
 
