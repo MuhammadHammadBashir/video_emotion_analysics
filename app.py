@@ -88,6 +88,10 @@ if uploaded_file:
                     #     st.error("Error: The API response did not contain expected results.")
                     if "result" in response_data:
                         result = response_data["result"]
+                        milli_seconds_spent=response_data["run_time_ms"]
+                        seconds =(milli_seconds_spent / 1000) + 10
+                        cost =  seconds * 0.0007449
+                        
                         result_video_path = result.get("result_video_path", "N/A")
                         combined_html_path = result.get("combined_html_path", "N/A")
 
@@ -105,6 +109,8 @@ if uploaded_file:
                             if key not in ["result_video_path", "combined_html_path"]:
                                 st.markdown(f"- **{key.replace('_', ' ').capitalize()}:** [{value}]({value})")
                         # Check if the combined HTML path is available and display it in a scrollable window
+                        markdown_line = f"### Total Time: **{seconds:.2f} seconds** | Cost Spent: **${cost:.2f}**"
+                        st.markdown(markdown_line)
                         if combined_html_path != "N/A":
                             st.markdown("#### Combined visulaization Output")
                             st.markdown(f"Download: [Combined visualization ]({combined_html_path})")
