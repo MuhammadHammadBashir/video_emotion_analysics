@@ -100,7 +100,7 @@ if uploaded_file:
                             st.video(result_video_path, format="video/mp4", start_time=0)
                         else:
                             st.markdown("- **Result Video Path:** N/A")
-                        st.markdown(""""### Additional zip Results  (contains files for each seconds, transcriptions etc)""")
+                        st.markdown("""### Additional zip Results  (contains files for each seconds, transcriptions etc)""")
                         for key, value in result.items():
                             if key not in ["result_video_path", "combined_html_path"]:
                                 st.markdown(f"- **{key.replace('_', ' ').capitalize()}:** [{value}]({value})")
@@ -115,7 +115,7 @@ if uploaded_file:
                                     html_content = response.text
 
                                     # Render the HTML in a scrollable container
-                                    st.components.v1.html(html_content, height=500, scrolling=True)
+                                    st.components.v1.html(html_content, width=1000,height=1000, scrolling=True)
                                 except requests.exceptions.RequestException as e:
                                     st.error(f"Failed to load HTML content: {e}")
                         else:
