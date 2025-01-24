@@ -89,7 +89,7 @@ if uploaded_file:
                     if "result" in response_data:
                         result = response_data["result"]
                         milli_seconds_spent=response_data["run_time_ms"]
-                        seconds =(milli_seconds_spent / 1000) + 10
+                        seconds =(milli_seconds_spent / 1000) + 15
                         cost =  seconds * 0.0007449
                         
                         result_video_path = result.get("result_video_path", "N/A")
