@@ -59,7 +59,7 @@ if uploaded_file:
 
             st.info("Processing the uploaded video for emotion analysis... This might take a few minutes.")
             with st.spinner("Analyzing emotions... Please wait."):
-                url = "https://api.cortex.cerebrium.ai/v4/p-c3473400/emotionanalysics/run"
+                url = "https://api.cortex.cerebrium.ai/v4/p-c3473400/emotionanalysics2/run"
                 payload = json.dumps({'media_url': blob_url})
                 headers = {
                 'Authorization': st.secrets["api_keys"]["cerebrium"],
