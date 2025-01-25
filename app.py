@@ -38,6 +38,14 @@ BLOB_SERVICE_CLIENT = BlobServiceClient.from_connection_string(CONNECT_STR)
 
 st.title("Emotion Analysis for Videos")
 
+# API selection
+api_options = {
+    "Face + Caption": "https://api.cortex.cerebrium.ai/v4/p-c3473400/emotionanalysics2/run",
+    "Face + HuggingfaceDS": "https://api.cortex.cerebrium.ai/v4/p-c3473400/emotionanalysics/run",
+    "Caption": "https://api.cortex.cerebrium.ai/v4/p-c3473400/emotionanalysics3/run"
+}
+selected_api = st.selectbox("Select the API for analysis", list(api_options.keys()))
+
 # File uploader
 uploaded_file = st.file_uploader("Select a video file to upload", type=["mp4", "avi"])
 
@@ -59,38 +67,22 @@ if uploaded_file:
 
             st.info("Processing the uploaded video for emotion analysis... This might take a few minutes.")
             with st.spinner("Analyzing emotions... Please wait."):
-                url = "https://api.cortex.cerebrium.ai/v4/p-c3473400/emotionanalysics2/run"
+                url = api_options[selected_api]
                 payload = json.dumps({'media_url': blob_url})
                 headers = {
-                'Authorization': st.secrets["api_keys"]["cerebrium"],
-                'Content-Type': 'application/json'
+                    'Authorization': st.secrets["api_keys"]["cerebrium"],
+                    'Content-Type': 'application/json'
                 }
 
                 try:
                     response = requests.post(url, headers=headers, data=payload, timeout=300)
                     response_data = response.json()
 
-                    # if "result" in response_data:
-                    #     result = response_data["result"]
-                    #     result_video_path = result.get("result_video_path", "N/A")
-                    #     combined_html_path = result.get("combined_html_path", "N/A")
-
-                    #     st.success("Analysis completed successfully!")
-                    #     st.markdown("### Key Results")
-                    #     st.markdown(f"- **Result Video Path:** [{result_video_path}]({result_video_path})" if result_video_path != "N/A" else "- **Result Video Path:** N/A")
-                    #     st.markdown(f"- **Combined HTML Path:** [{combined_html_path}]({combined_html_path})" if combined_html_path != "N/A" else "- **Combined HTML Path:** N/A")
-
-                    #     st.markdown("### Additional Results")
-                    #     for key, value in result.items():
-                    #         if key not in ["result_video_path", "combined_html_path"]:
-                    #             st.markdown(f"- **{key.replace('_', ' ').capitalize()}:** [{value}]({value})")
-                    # else:
-                    #     st.error("Error: The API response did not contain expected results.")
                     if "result" in response_data:
                         result = response_data["result"]
-                        milli_seconds_spent=response_data["run_time_ms"]
-                        seconds =(milli_seconds_spent / 1000) + 15
-                        cost =  seconds * 0.0007449
+                        milli_seconds_spent = response_data["run_time_ms"]
+                        seconds = (milli_seconds_spent / 1000) + 15
+                        cost = seconds * 0.0007449
                         
                         result_video_path = result.get("result_video_path", "N/A")
                         combined_html_path = result.get("combined_html_path", "N/A")
@@ -101,37 +93,29 @@ if uploaded_file:
                         # Check if the result video path is available and display it in a video player
                         if result_video_path != "N/A":
                             st.markdown("#### Result Video")
-                            st.markdown(f"- **Result Video download:** [{result_video_path}]({result_video_path})" if result_video_path != "N/A" else "- **Result Video Path:** N/A")
+                            st.markdown(f"- **Result Video download:** [{result_video_path}]({result_video_path})")
                         else:
                             st.markdown("- **Result Video Path:** N/A")
-                        st.markdown("""### Additional zip Results  (contains files for each seconds, transcriptions etc)""")
+                        st.markdown("### Additional zip Results")
                         for key, value in result.items():
                             if key not in ["result_video_path", "combined_html_path"]:
                                 st.markdown(f"- **{key.replace('_', ' ').capitalize()}:** [{value}]({value})")
-                        # Check if the combined HTML path is available and display it in a scrollable window
-                        markdown_line = f"### Total Time: **{seconds:.2f} seconds** | Cost Spent: **${cost:.2f}**"
-                        st.markdown(markdown_line)
+                        st.markdown(f"### Total Time: **{seconds:.2f} seconds** | Cost Spent: **${cost:.2f}**")
                         if combined_html_path != "N/A":
-                            st.markdown("#### Combined visulaization Output")
-                            st.markdown(f"Download: [Combined visualization ]({combined_html_path})")
+                            st.markdown("#### Combined visualization Output")
+                            st.markdown(f"Download: [Combined visualization]({combined_html_path})")
                             with st.spinner("Loading combined HTML content..."):
                                 try:
-                                    response = requests.get(combined_html_path, timeout=30)  # Load HTML content
-                                    response.raise_for_status()  # Raise an error for HTTP issues
+                                    response = requests.get(combined_html_path, timeout=30)
+                                    response.raise_for_status()
                                     html_content = response.text
-
-                                    # Render the HTML in a scrollable container
-                                    st.components.v1.html(html_content, width=1000,height=1000, scrolling=True)
+                                    st.components.v1.html(html_content, width=1000, height=1000, scrolling=True)
                                 except requests.exceptions.RequestException as e:
                                     st.error(f"Failed to load HTML content: {e}")
                         else:
                             st.markdown("- **Combined HTML Path:** N/A")
-
-                    
                     else:
                         st.error("Error: The API response did not contain expected results.")
-                ## here is the result
-                
                 except requests.exceptions.RequestException as e:
                     st.error(f"API request failed: {e}")
 
